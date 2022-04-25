@@ -78,6 +78,20 @@ func get_public_key{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_chec
 end
 
 @view
+func pending_tx_call_array_len{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        ) -> (res : felt):
+    let (res) = _pending_tx_call_array_len.read()
+    return (res=res)
+end
+
+@view
+func pending_tx_calldata_len{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+        ) -> (res : felt):
+    let (res) = _pending_tx_calldata_len.read()
+    return (res=res)
+end
+
+@view
 func get_nonce{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}() -> (res : felt):
     let (res) = Account_get_nonce()
     return (res=res)
@@ -219,6 +233,17 @@ func submit_transaction{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_
     # Emit event & update tx count
     SubmitTransaction.emit(nonce=nonce)
 
+    return ()
+end
+
+@external
+func save_hash{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(new_hash : felt):
+    assert_only_self()
+    let (_hash) = _code_hash.read()
+    # with_attr error_message("2FArgent::Hash already set"):
+    #     assert_is_zero(_hash)
+    # end
+    _code_hash.write(new_hash)
     return ()
 end
 

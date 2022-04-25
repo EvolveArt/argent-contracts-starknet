@@ -1,6 +1,7 @@
 import pytest
 import asyncio
 import logging
+
 from starkware.starknet.testing.starknet import Starknet
 from starkware.starknet.business_logic.state.state import BlockInfo
 from utils.Signer import Signer
@@ -73,7 +74,9 @@ async def test_submit_transaction(account_factory, dapp_factory):
         *[x for t in call_array for x in t],
         len(calldata),
         *calldata,
-        1]
+        23423423]
 
-    await sender.send_transaction([(account.contract_address, 'submit_transaction', execute_calldata)], [signer], nonce=0)
-    
+    await signer.send_transaction(account, account.contract_address, "submit_transaction", execute_calldata)
+
+    assert (await account.pending_tx_call_array_len().call()).result.res == (len(call_array))
+    assert (await account.pending_tx_calldata_len().call()).result.res == (len(calldata))
