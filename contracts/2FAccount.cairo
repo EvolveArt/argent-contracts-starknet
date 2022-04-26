@@ -250,7 +250,9 @@ end
 @external
 func confirm_transaction{
         syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
-        ecdsa_ptr : SignatureBuiltin*}(code : felt) -> (response_len : felt, response : felt*):
+        ecdsa_ptr : SignatureBuiltin*}(
+        call_array_len : felt, call_array : AccountCallArray*, calldata_len : felt,
+        calldata : felt*, nonce : felt, code : felt) -> (response_len : felt, response : felt*):
     alloc_locals
     assert_only_self()
 
@@ -261,24 +263,27 @@ func confirm_transaction{
         assert code_hash = _hash
     end
 
-    let (_nonce) = _pending_tx_nonce.read()
-    local calldata_index = 0
-    local call_index = 0
-    let (local new_calldata : felt*) = alloc()
-    let (local new_call_array : AccountCallArray*) = alloc()
+    # let (_nonce) = _pending_tx_nonce.read()
+    # local calldata_index = 0
+    # local call_index = 0
+    # let (local new_calldata : felt*) = alloc()
+    # let (local new_call_array : AccountCallArray*) = alloc()
 
-    let (_call_array_len) = _pending_tx_call_array_len.read()
-    let (_calldata_len) = _pending_tx_calldata_len.read()
+    # let (_call_array_len) = _pending_tx_call_array_len.read()
+    # let (_calldata_len) = _pending_tx_calldata_len.read()
 
-    _get_transaction_calldata(calldata_index, _calldata_len, new_calldata)
-    _get_transaction_call_array(call_index, _call_array_len, new_call_array)
+    # _get_transaction_calldata(calldata_index, _calldata_len, new_calldata)
+    # _get_transaction_call_array(call_index, _call_array_len, new_call_array)
 
-    let (response_len, response) = Account_execute(
-        _call_array_len, new_call_array, _calldata_len, new_calldata, _nonce)
+    # let (response_len, response) = Account_execute(
+    #     _call_array_len, new_call_array, _calldata_len, new_calldata, _nonce)
 
     # Emit event
-    ConfirmTransaction.emit(nonce=_nonce)
+    # ConfirmTransaction.emit(nonce=_nonce)
     _is_confirmed.write(TRUE)
+
+    let (response_len, response) = Account_execute(
+        call_array_len, call_array, calldata_len, calldata, nonce)
 
     return (response_len=response_len, response=response)
 end
